@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Zoomable Map</title>
+  <title>Zoomable SVG with Mouse Wheel & Right-Click Drag</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
       height: 100%;
-      background-color: #111;
+      width: 100%;
+      overflow: hidden;
+      background: #111;
     }
-    #drawing {
+    #panzoom {
       width: 100%;
       height: 100%;
       cursor: grab;
@@ -19,44 +20,48 @@
   </style>
 </head>
 <body>
-  <div id="drawing"></div>
+  <div id="panzoom">
+    <!-- Embed your SVG directly; use the object tag -->
+    <object id="svg-object" type="image/svg+xml" data="zoomable-map.svg"></object>
+  </div>
 
-  <!-- SVG.js core -->
-  <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.2/dist/svg.min.js"></script>
-  <!-- SVG.js panzoom plugin -->
-  <script src="https://cdn.jsdelivr.net/npm/svg.panzoom.js@2.1.3/dist/svg.panzoom.min.js"></script>
-
+  <!-- svg-pan-zoom library -->
+  <script src="https://unpkg.com/svg-pan-zoom@3.7.1/dist/svg-pan-zoom.min.js"></script>
   <script>
-    // Load SVG dynamically
-    fetch('zoomable-map.svg')
-      .then(res => res.text())
-      .then(svgText => {
-        const draw = SVG().addTo('#drawing').size('100%', '100%');
-        const svgFragment = SVG(svgText);
-        draw.add(svgFragment);
+    document.addEventListener("DOMContentLoaded", () => {
+      const obj = document.getElementById('svg-object');
 
-        // Set a large virtual viewBox for precision zooming
-        draw.viewbox(0, 0, 15000, 15000);
+      obj.addEventListener('load', () => {
+        const svgDoc = obj.contentDocument;
+        const svgEl = svgDoc.querySelector('svg');
 
-        // Enable panzoom
-        const panZoom = draw.panZoom({
-          zoomMin: 0.000033,  // ~0.5 / 15000
-          zoomMax: 30000,     // allows deep zoom in
-          zoomFactor: 0.2,
-          panMouseButton: 2   // right click
+        const panZoom = svgPanZoom(svgEl, {
+          zoomEnabled: true,
+          panEnabled: true,
+          controlIconsEnabled: false,
+          fit: true,
+          center: true,
+          minZoom: 0.000033333,  // ~0.5 / 15000
+          maxZoom: 1000,
+          zoomScaleSensitivity: 0.2,
+          beforePan: function(oldPan, newPan) { return newPan; },
+          onZoom: function(scale) {},
         });
 
-        // Prevent context menu so right-click can be used for panning
-        window.addEventListener('contextmenu', e => e.preventDefault());
-
-        // Enable scroll zooming (mouse wheel)
-        draw.on('wheel', function (event) {
-          event.preventDefault();
-          const { offsetX, offsetY, deltaY } = event;
-          const zoomAmount = deltaY > 0 ? 0.9 : 1.1;
-          panZoom.zoom(zoomAmount, { x: offsetX, y: offsetY });
+        // Enable mouse-wheel zoom
+        obj.parentNode.addEventListener('wheel', evt => {
+          evt.preventDefault();
+          const delta = evt.deltaY < 0 ? 1.2 : 0.8;
+          const rect = obj.getBoundingClientRect();
+          const offsetX = evt.clientX - rect.left;
+          const offsetY = evt.clientY - rect.top;
+          panZoom.zoomAtPoint(delta, { x: offsetX, y: offsetY });
         });
+
+        // Right-click panning: prevent context menu
+        obj.parentNode.addEventListener('contextmenu', e => e.preventDefault());
       });
+    });
   </script>
 </body>
 </html>
