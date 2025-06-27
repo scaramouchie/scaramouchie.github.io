@@ -3872,21 +3872,21 @@
     
  <script src="https://unpkg.com/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
   <script>
-    svgPanZoom('#mySVG', {
-      zoomEnabled: true,
-      controlIconsEnabled: false,
-      fit: true,
-      center: true,
-      minZoom: 0.0667,
-      maxZoom: 100000,
-      zoomScaleSensitivity: 0.4,
-      customEventsHandler: {
-        init: function(options) {
-          const svgElement = options.svgElement;
-          svgElement.addEventListener('contextmenu', e => e.preventDefault()); // right-click pan support    
-        }
-      }
-    });
+    const panZoom = svgPanZoom('#mySVG', {
+  zoomEnabled: true,
+  controlIconsEnabled: false,
+  fit: true,
+  center: true,
+  minZoom: 0.0667,     // ← stops users from zooming out past full view
+  maxZoom: 100000,     // ← allows deep zoom in
+  zoomScaleSensitivity: 0.4,
+  customEventsHandler: {
+    init: function (options) {
+      const svgElement = options.svgElement;
+      svgElement.addEventListener("contextmenu", (e) => e.preventDefault());
+    },
+  },
+});
   </script>
 </body>
 </html>
