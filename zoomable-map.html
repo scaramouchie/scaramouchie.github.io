@@ -1,28 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Interactive Zoomable SVG</title>
+  <meta charset="UTF-8">
+  <title>SVG Pan-Zoom</title>
   <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      background: #111;
-    }
-    #svgContainer {
-      width: 100%; height: 100%;
-      cursor: grab;
-    }
-    svg {
-      width: 100%;
-      height: 100%;
-      pointer-events: all;
-    }
+    html, body { margin: 0; height: 100%; }
+    svg { width: 100%; height: 100%; display: block; background: #111; }
   </style>
 </head>
 <body>
-  <div id="svgContainer">
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="zoomSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16225.21 16271.99">
   <g id="Layer_1_copy">
@@ -3883,38 +3869,23 @@
     </g>
   </g>
 </svg>
-  </div>
-
-  <script src="https://unpkg.com/@panzoom/panzoom@4.6.0/dist/panzoom.min.js"></script>
+    
+ <script src="https://unpkg.com/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
   <script>
-    const container = document.getElementById('svgContainer');
-    const svgEl = document.getElementById('zoomSvg');
-
-    const panzoom = Panzoom(svgEl, {
-      minScale: 0.0000333,    // ~0.5 / 15000
-      maxScale: 1000,
-      contain: 'outside',
-      cursor: 'grab'
-    });
-
-    container.addEventListener('wheel', panzoom.zoomWithWheel);
-
-    container.addEventListener('mousedown', e => {
-      if (e.button === 2) {
-        e.preventDefault();
-        container.style.cursor = 'grabbing';
-        panzoom.panStart(e);
+    svgPanZoom('#mySVG', {
+      zoomEnabled: true,
+      controlIconsEnabled: false,
+      fit: true,
+      center: true,
+      minZoom: 0.000033,
+      maxZoom: 1000,
+      customEventsHandler: {
+        init: function(options) {
+          const svgElement = options.svgElement;
+          svgElement.addEventListener('contextmenu', e => e.preventDefault()); // right-click pan support
+        }
       }
     });
-    container.addEventListener('mousemove', e => panzoom.pan(e));
-    container.addEventListener('mouseup', e => {
-      if (e.button === 2) {
-        panzoom.panEnd(e);
-        container.style.cursor = 'grab';
-      }
-    });
-    container.addEventListener('contextmenu', e => e.preventDefault());
   </script>
 </body>
 </html>
-
