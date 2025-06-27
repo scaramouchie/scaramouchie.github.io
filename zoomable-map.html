@@ -1,56 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF‑8" />
-  <title>Pannable & Zoomable SVG</title>
+  <meta charset="utf-8" />
+  <title>Interactive Zoomable SVG</title>
   <style>
-    html, body { margin:0; height:100%; overflow:hidden; background:#111 }
-    #container { width:100%; height:100%; cursor: grab }
-    #svgEmbed { width:100%; height:100%; pointer-events:none }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #111;
+    }
+    #svgContainer {
+      width: 100%; height: 100%;
+      cursor: grab;
+    }
+    svg {
+      width: 100%; height: 100%;
+      pointer-events: all;
+    }
   </style>
 </head>
 <body>
-  <div id="container">
-    <object id="svgEmbed" data="zoomable-map.svg" type="image/svg+xml"></object>
+  <div id="svgContainer">
+    <!-- Inline your SVG here -->
+    <!-- Replace the <svg>...</svg> block with the actual content of zoomable-map.svg -->
+    <svg id="zoomSvg" viewBox="0 0 15000 15000" xmlns="http://www.w3.org/2000/svg">
+      <!-- Example: use an <image> tag or your SVG paths directly -->
+      <image href="zoomable-map.svg" x="0" y="0" width="15000" height="15000" />
+    </svg>
   </div>
 
-  <!-- Panzoom library -->
   <script src="https://unpkg.com/@panzoom/panzoom@4.6.0/dist/panzoom.min.js"></script>
   <script>
-    const container = document.getElementById('container');
-    const embed = document.getElementById('svgEmbed');
+    const container = document.getElementById('svgContainer');
+    const svgEl = document.getElementById('zoomSvg');
 
-    function setupPanzoom(el) {
-      const panzoom = Panzoom(el, {
-        maxScale: 1000,
-        minScale: 0.000033, // ~0.5/15000
-        contain: 'outside',
-        cursor: 'grab'
-      });
-      container.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
-      return panzoom;
-    }
-
-    embed.addEventListener('load', () => {
-      const svg = embed.contentDocument.querySelector('svg');
-      svg.style.pointerEvents = 'all';
-      const panzoomInstance = setupPanzoom(svg);
-
-      // Right-click drag → pan
-      container.addEventListener('mousedown', e => {
-        if (e.button === 2) {
-          e.preventDefault();
-          container.style.cursor = 'grabbing';
-          panzoomInstance.panStart(e);
-        }
-      });
-      container.addEventListener('mousemove', e => panzoomInstance.pan(e));
-      container.addEventListener('mouseup', e => {
-        if (e.button === 2) panzoomInstance.panEnd(e);
-        container.style.cursor = 'grab';
-      });
-      container.addEventListener('contextmenu', e => e.preventDefault());
+    const panzoom = Panzoom(svgEl, {
+      minScale: 0.000033,    // ~0.5 / 15000
+      maxScale: 1000,
+      contain: 'outside',
+      cursor: 'grab'
     });
+
+    // Enable wheel zoom
+    container.addEventListener('wheel', panzoom.zoomWithWheel);
+
+    // Right-click dragging
+    container.addEventListener('mousedown', e => {
+      if (e.button === 2) {
+        e.preventDefault();
+        container.style.cursor = 'grabbing';
+        panzoom.panStart(e);
+      }
+    });
+    container.addEventListener('mousemove', e => panzoom.pan(e));
+    container.addEventListener('mouseup', e => {
+      if (e.button === 2) {
+        panzoom.panEnd(e);
+        container.style.cursor = 'grab';
+      }
+    });
+    container.addEventListener('contextmenu', e => e.preventDefault());
   </script>
 </body>
 </html>
