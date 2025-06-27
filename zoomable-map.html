@@ -5,7 +5,7 @@
   <title>SVG Pan-Zoom</title>
   <style>
     html, body { margin: 0; height: 100%; }
-    svg { width: 100%; height: 100%; display: block; background: #111; }
+    svg { width: 100%; height: 100%; display: block; background: white; }
   </style>
 </head>
 <body>
@@ -3883,6 +3883,7 @@
         init: function(options) {
           const svgElement = options.svgElement;
           svgElement.addEventListener('contextmenu', e => e.preventDefault()); // right-click pan support
+      zoomScaleSensitivity: 0.4,  // default is 0.2 — try 0.4 or 0.5 for faster zooming    
         }
       }
     });
